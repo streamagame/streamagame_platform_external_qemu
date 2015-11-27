@@ -395,8 +395,6 @@ endif
 
 $(call end-emulator-program)
 
-##ifeq ($(EMULATOR_TARGET_ARCH),x86)
-
 ##############################################################################
 ##############################################################################
 ###
@@ -425,12 +423,10 @@ common_LOCAL_CFLAGS += \
 
 
 common_LOCAL_SRC_FILES := \
-        streamagame-renderer/main-gridraster-androidx86-arch.c \
+        streamagame-renderer/renderer-main.c \
         streamagame-renderer/socket.c \
-        streamagame-renderer/gridraster-vm-androidx86.c \
-        streamagame-renderer/opengles_gridraster.c \
-        streamagame-renderer/utils.cpp \
-	streamagame-renderer/gridraster-update-ld-path.c \
+        streamagame-renderer/renderer-sdl.c \
+        streamagame-renderer/renderer-opengles.c \
 
 common_LOCAL_INC_FILES += \
 	$(LOCAL_PATH)/streamagame-renderer
@@ -444,8 +440,10 @@ ifneq ($(strip $(CONFIG_STATIC_EXECUTABLE)$(BUILD_HOST_static)),)
     common_LOCAL_LDLIBS    += -static
 endif
 
+ifeq ($(EMULATOR_TARGET_ARCH),x86)
+
 ## one for 32-bit
-$(call start-emulator-program, streamagame-renderer-$(EMULATOR_TARGET_ARCH))
+$(call start-emulator-program, streamagame-renderer)
 LOCAL_STATIC_LIBRARIES += \
     emulator-libui \
     emulator-libqemu \
@@ -478,7 +476,7 @@ endif
 $(call end-emulator-program)
 
 ## one for 64-bit
-$(call start-emulator64-program, streamagame-renderer64-$(EMULATOR_TARGET_ARCH))
+$(call start-emulator64-program, streamagame-renderer64)
 LOCAL_STATIC_LIBRARIES += \
     emulator64-libui \
     emulator64-libqemu \
@@ -508,6 +506,6 @@ ifeq ($(HOST_OS),windows)
   LOCAL_LDFLAGS += -lmingw32
 endif
 
-$(call end-emulator64-program)
+$(call end-emulator-program)
 
-##endif # ($(EMULATOR_TARGET_CPU),x86)
+endif # ($(EMULATOR_TARGET_CPU),x86)

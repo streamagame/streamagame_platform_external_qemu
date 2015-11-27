@@ -108,44 +108,6 @@ SOCKET open_server(char *port)
   return (server_sock);
 }
 
-#if 0
-SOCKET open_vmware_server(char *port)
-{
-  SOCKET server_sock;
-  int afVMCI = VMCISock_GetAFValue();
-  struct sockaddr_vm vm_addr;
-  int option_value;
-
-  memset(&vm_addr, 0, sizeof(vm_addr));
-  vm_addr.svm_family = afVMCI;
-  sscanf(port, "%d", &(vm_addr.svm_port));
-  vm_addr.svm_port = htons(vm_addr.svm_port);
-  vm_addr.svm_cid = VMCISock_GetLocalCID();
-  
-  server_sock = socket(afVMCI, SOCK_STREAM, 0);
-  if (server_sock == INVALID_SOCKET)
-    {
-      perror("socket() server");
-      exit(1);
-    }
-
-  option_value = 1;
-  setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(option_value));
-  if (bind(server_sock, (struct sockaddr *)&vm_addr, sizeof(vm_addr)) == SOCKET_ERROR)
-    {
-      perror("bind()");
-      exit(1);
-    }
-
-  if (listen(server_sock, SOMAXCONN) == SOCKET_ERROR)
-    {
-      perror("listen()");
-      exit(1);
-    }
-  return (server_sock);
-}
-#endif 
-
 SOCKET connect_client(SOCKET server)
 {
   SOCKADDR_IN client_addr;
@@ -199,43 +161,5 @@ char *read_socket(SOCKET sock, int maxlen)
 int write_socket(SOCKET sock, char *data, int len)
 {
   return (send(sock, data, len, 0));
-}
-
-
-/* open listen() port on loopback interface */
-int open_server_vm_ip(int port, int type)
-{
-    struct sockaddr_in addr;
-    size_t alen;
-    int s, n;
-
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    s = socket(AF_INET, type, 0);
-    if(s < 0) return -1;
-
-    n = 1;
-    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &n, sizeof(n));
-
-    if(bind(s, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
-        close(s);
-        return -1;
-    }
-
-    if (type == SOCK_STREAM) {
-        int ret;
-
-        ret = listen(s, LISTEN_BACKLOG);
-
-        if (ret < 0) {
-            close(s);
-            return -1;
-        }
-    }
-
-    return s;
 }
 

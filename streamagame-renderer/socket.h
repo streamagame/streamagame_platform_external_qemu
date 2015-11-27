@@ -43,5 +43,4 @@ SOCKET open_server(char *port);
 char *read_socket(SOCKET sock, int len);
 int write_socket(SOCKET sock, char *data, int len);
 SOCKET connect_client(SOCKET server);
-int open_server_vm_ip(int port, int type);
 #endif

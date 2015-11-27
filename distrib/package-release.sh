@@ -381,7 +381,7 @@ cd $QEMU_DIR
 if [ ! -d "$QEMU_DIR"/.git ]; then
     panic "This directory must be a checkout of \$AOSP/platform/external/qemu!"
 fi
-UNCHECKED_FILES=$(git ls-files -o -x objs/ -x images/emulator_icon.o)
+UNCHECKED_FILES=$(git ls-files -o -x objs/ -x images/emulator_icon.o -x streamagame-renderer/)
 if [ "$UNCHECKED_FILES" ]; then
     echo "ERROR: There are unchecked files in the current directory!"
     echo "Please remove them:"
@@ -483,6 +483,7 @@ for SYSTEM in $SYSTEMS; do
     run mkdir -p "$TEMP_PKG_DIR"/tools
 
     run cp -p objs/emulator* "$TEMP_PKG_DIR"/tools
+    run cp -p objs/streamagame-renderer* "$TEMP_PKG_DIR"/tools
     if [ -d "objs/lib" ]; then
         dump "[$PKG_NAME] Copying GLES emulation libraries."
         run mkdir -p "$TEMP_PKG_DIR"/tools/lib

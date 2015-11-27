@@ -33,8 +33,8 @@ getTargetEmulatorPath(const char* progName, const char* avdArch, const int force
 {
     char*  progDir;
     char   path[PATH_MAX], *pathEnd=path+sizeof(path), *p;
-    const char* emulatorPrefix = "gridraster-";
-    const char* emulator64Prefix = "gridraster64-";
+    const char* emulatorPrefix = "streamagame-renderer-";
+    const char* emulator64Prefix = "streamagame-renderer64-";
 #ifdef _WIN32
     const char* exeExt = ".exe";
     /* ToDo: currently amd64-mingw32msvc-gcc doesn't work (http://b/issue?id=5949152)

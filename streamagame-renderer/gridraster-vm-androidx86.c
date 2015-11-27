@@ -35,9 +35,6 @@ typedef int bool;
 #define TCP_PORT_SENSOR 22471 // VM side port
 #define TCP_PORT_LISTEN_TO_ADDR 22471 // host side port
 
-extern void stop_vm();
-extern void start_vm();
-
 /* Strings describing the host system's OpenGL implementation */
 char gl_vendor[ANDROID_GLSTRING_BUF_SIZE];
 char gl_renderer[ANDROID_GLSTRING_BUF_SIZE];
@@ -47,16 +44,8 @@ char gl_version[ANDROID_GLSTRING_BUF_SIZE];
 /* Required by android/utils/debug.h */
 extern int android_verbose;
 
-#define DEBUG 1
 
-#if DEBUG
-#  define D(...)  do { if (android_verbose) printf("emulator:" __VA_ARGS__); } while (0)
-#else
-#  define D(...)  do{}while(0)
-#endif
-
-
-#define USAGE " width height [device]\n"
+#define USAGE " width height\n"
 
 
 // Main thread needs to wait on the sdl thread to make the SL thred handle global
@@ -75,20 +64,12 @@ static float g_rot = 0.0;
 
 static float g_ratio = 1.0;
 
-static char *g_vmip = "172.23.44.201";
-static char *g_vm_ip[100];
-
-
-uint32_t g_vm_sock_addr;
 #define USER_EVENT_ROTATION 1
 #define USER_EVENT_NEWCLIENT 2
 
-int gridraster_vm(int _width, int _height);
-extern void multitouch_init();
+// extern void multitouch_init();
 
-extern const char * get_vm_ip();
-
-static SDL_Surface *open_window(int width, int height, int density)
+static SDL_Surface *openSDLWindow(int width, int height, int density)
 {
   SDL_Surface *screen;
 
@@ -129,7 +110,7 @@ void join_sdl_thread(){
 
 }
 
-static void *get_window_id(void)
+static void *getSDLWindowId(void)
 {
   SDL_SysWMinfo wminfo;
   void *winhandle;
@@ -224,7 +205,7 @@ static void *input_thread(void *arg)
 		SDL_Event connectedEvent;
 		connectedEvent.type = SDL_USEREVENT;
 		connectedEvent.user.code = USER_EVENT_NEWCLIENT;
-		connectedEvent.user.data1 = (int)controlSocket;
+		connectedEvent.user.data1 = (void*)controlSocket;
 		int ret;
 		do {
 			printf("Configuring the transmission of events to the remote server... \n");
@@ -232,9 +213,11 @@ static void *input_thread(void *arg)
 			sleep(1);
 		} while (ret != 0);
 	}
+
+	return NULL;
 }
 
-void event_loop(int w, int h) {
+void eventLoop(int w, int h) {
 	SDL_Event event;
 	char mbuff[256];
 	int nx, ny;
@@ -354,7 +337,7 @@ static void winexit(void)
 }
 #endif
 
-int gridraster_vm(int _width, int _height)
+int setupStreamagameRenderer(int _width, int _height)
 {
   int width = _width;
   int height = _height;
@@ -396,32 +379,32 @@ int gridraster_vm(int _width, int _height)
     //XInitThreads();
 #endif
 
-  g_window_surface = open_window(width, height, dpi);
+  g_window_surface = openSDLWindow(width, height, dpi);
 
-  g_window_id = window_id = get_window_id();
+  g_window_id = window_id = getSDLWindowId();
   printf("Window ID: %p\n",window_id);
 
     {
         if (android_initOpenglesEmulation() == 0){
-           D("android_initOpenglesEmulation  successfull.\n");
+           printf("android_initOpenglesEmulation  successfull.\n");
 	   if(android_startOpenglesRenderer(width, height) == 0){
-               D("android_startOpenglesRenderer  successfull.\n");
+               printf("android_startOpenglesRenderer  successfull.\n");
             	android_getOpenglesHardwareStrings(
                     gl_vendor, sizeof(android_gl_vendor),
                     gl_renderer, sizeof(android_gl_renderer),
                     gl_version, sizeof(android_gl_version));
-            	D("initialized OpenglES emulation successfully.\n");
+            	printf("initialized OpenglES emulation successfully.\n");
             	printf("OpenGL vendor: %s\n", gl_vendor);
             	printf("OpenGL renderer: %s\n", gl_renderer);
             	printf("OpenGL version: %s\n", gl_version);
 	   } else {
 
-            	D("android_startOpenglesRenderer  failure.\n");
+            	printf("android_startOpenglesRenderer  failure.\n");
             	exit(1);
            }
         }
 	else {
-            D("android_initOpenglesEmulation  failure.\n");
+            printf("android_initOpenglesEmulation  failure.\n");
             exit(1);
         }
     }
@@ -431,7 +414,7 @@ int gridraster_vm(int _width, int _height)
     exit(1);
   }
 
-  D("[OpenGL init OK]\n");
+  printf("[OpenGL init OK]\n");
 
 
 
@@ -444,9 +427,7 @@ void standalone_gridraster_vm_thread(int width, int height)
 	g_width = width;
 	g_height = height;
 
-	gridraster_vm(g_width, g_height);
+	setupStreamagameRenderer(g_width, g_height);
 
-    event_loop(g_width, g_height);
-
-    return 0;
+    eventLoop(g_width, g_height);
 }

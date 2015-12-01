@@ -199,7 +199,7 @@ static void *input_thread(void *arg)
 		SDL_Event connectedEvent;
 		connectedEvent.type = SDL_USEREVENT;
 		connectedEvent.user.code = USER_EVENT_NEWCLIENT;
-		connectedEvent.user.data1 = (void*)controlSocket;
+		connectedEvent.user.data1 = (int)controlSocket;
 		int ret;
 		do {
 			printf("Configuring the transmission of events to the remote server... \n");
